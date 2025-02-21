@@ -43,7 +43,7 @@ public class PaintBlockBase extends BlockBase {
 	private PaintColour colour;
 	
 	public PaintBlockBase(String name, String catName, int[] coreMetas, boolean[] dynamic, PaintColour colour) {
-		super(name, Material.CLOTH);
+		super(name, Material.PLANTS); // Modified code to let npcs walk on paint blocks
 		this.categoryName = catName;
 		this.coreMetas = coreMetas;
 		this.setHardness(2.0F);
