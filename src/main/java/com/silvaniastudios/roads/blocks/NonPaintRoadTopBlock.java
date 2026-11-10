@@ -69,7 +69,7 @@ public class NonPaintRoadTopBlock extends BlockBase {
 
     @Nullable
     public AxisAlignedBB getCollisionBoundingBox(IBlockState blockState, IBlockAccess worldIn, BlockPos pos) {
-        return new AxisAlignedBB(0.0D, -1+getBlockBelowHeight(worldIn, pos), 0.0D, 1.0D, -1+getBlockBelowHeight(worldIn, pos)+0.0625, 1.0D);
+        return NULL_AABB;
     }
     
     @Override
