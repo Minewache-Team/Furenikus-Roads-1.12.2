@@ -62,13 +62,15 @@ public abstract class PaintBakedModelBase implements IBakedModel {
 		}
 	}
 
+	private final com.silvaniastudios.roads.client.model.QuadCache quadCache = new com.silvaniastudios.roads.client.model.QuadCache();
+
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 		if (side != null) {
 			return Collections.emptyList();
 		}
 
-		return packQuads(state);
+		return quadCache.get(state, this::packQuads);
 	}
 
 	//Overriden in subclasses

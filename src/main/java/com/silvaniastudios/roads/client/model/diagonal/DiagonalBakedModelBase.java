@@ -36,6 +36,8 @@ public class DiagonalBakedModelBase implements IBakedModel {
 		mc = Minecraft.getMinecraft();
 	}
 
+	private final com.silvaniastudios.roads.client.model.QuadCache quadCache = new com.silvaniastudios.roads.client.model.QuadCache();
+
 	@Override
 	public List<BakedQuad> getQuads(IBlockState state, EnumFacing side, long rand) {
 
@@ -43,6 +45,10 @@ public class DiagonalBakedModelBase implements IBakedModel {
 			return Collections.emptyList();
 		}
 
+		return quadCache.get(state, this::buildQuads);
+	}
+
+	private List<BakedQuad> buildQuads(IBlockState state) {
 		IExtendedBlockState extendedState = (IExtendedBlockState) state;
 		EnumFacing facing = extendedState.getValue(RoadBlockDiagonal.FACING);
 		
