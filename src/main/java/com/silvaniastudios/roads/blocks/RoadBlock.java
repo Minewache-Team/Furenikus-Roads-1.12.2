@@ -73,7 +73,7 @@ public class RoadBlock extends BlockBase {
 
 		if (stateAbove.getBlock() instanceof BlockSnow && !(stateAbove.getBlock() instanceof BlockRoadSnow)) {
 			if (RoadsConfig.general.snowOnRoads) {
-				worldIn.setBlockState(pos.offset(EnumFacing.UP), FRBlocks.road_snow.getDefaultState(), 3);
+				worldIn.setBlockState(pos.offset(EnumFacing.UP), FRBlocks.road_snow.getDefaultState().withProperty(BlockSnow.LAYERS, stateAbove.getValue(BlockSnow.LAYERS)), 3);
 			} else {
 				worldIn.setBlockToAir(pos.offset(EnumFacing.UP));
 			}
