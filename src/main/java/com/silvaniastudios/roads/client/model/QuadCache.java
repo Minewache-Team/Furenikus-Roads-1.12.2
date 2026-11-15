@@ -19,18 +19,27 @@ import net.minecraftforge.common.property.IExtendedBlockState;
 public final class QuadCache {
 
 	public static volatile boolean enabled = !Boolean.getBoolean("furenikus.noquadcache");
+	/** Cached quads as {@link FlatQuad} (bit-identical, about half the heap). Kill switch: MWRP fix_furenikusflat, -Dfurenikus.noflatquads. */
+	public static volatile boolean flat = !Boolean.getBoolean("furenikus.noflatquads");
 	private static final int MAX = 4096;
 
 	private final ConcurrentHashMap<Object, List<BakedQuad>> quads = new ConcurrentHashMap<>();
+	private volatile boolean builtFlat = flat;
 
 	public List<BakedQuad> get(IBlockState state, Function<IBlockState, List<BakedQuad>> build) {
 		if (!enabled || state == null) return build.apply(state);
+		boolean f = flat;
+		if (f != builtFlat) {
+			builtFlat = f;
+			quads.clear();
+		}
 		Object key = state instanceof IExtendedBlockState
 				? new Key(((IExtendedBlockState) state).getClean(), ((IExtendedBlockState) state).getUnlistedProperties())
 				: state;
 		List<BakedQuad> cached = quads.get(key);
 		if (cached != null) return cached;
 		List<BakedQuad> built = build.apply(state);
+		if (f) built = FlatQuad.convert(built);
 		if (quads.size() >= MAX) quads.clear();
 		quads.put(key, built);
 		return built;
