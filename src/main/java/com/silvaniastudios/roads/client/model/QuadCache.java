@@ -1,9 +1,14 @@
 package com.silvaniastudios.roads.client.model;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
+import com.silvaniastudios.roads.FurenikusRoads;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -23,16 +28,20 @@ public final class QuadCache {
 	public static volatile boolean flat = !Boolean.getBoolean("furenikus.noflatquads");
 	private static final int MAX = 4096;
 
+	/** All live caches (weak: models of an old resource reload go away), so a switch of {@link #flat} empties every one, not only those asked again. */
+	private static final Set<QuadCache> ALL = Collections.newSetFromMap(new WeakHashMap<>());
+	private static volatile boolean builtFlat = flat;
+
 	private final ConcurrentHashMap<Object, List<BakedQuad>> quads = new ConcurrentHashMap<>();
-	private volatile boolean builtFlat = flat;
+
+	public QuadCache() {
+		synchronized (ALL) { ALL.add(this); }
+	}
 
 	public List<BakedQuad> get(IBlockState state, Function<IBlockState, List<BakedQuad>> build) {
 		if (!enabled || state == null) return build.apply(state);
 		boolean f = flat;
-		if (f != builtFlat) {
-			builtFlat = f;
-			quads.clear();
-		}
+		if (f != builtFlat) switchMode(f);
 		Object key = state instanceof IExtendedBlockState
 				? new Key(((IExtendedBlockState) state).getClean(), ((IExtendedBlockState) state).getUnlistedProperties())
 				: state;
@@ -43,6 +52,21 @@ public final class QuadCache {
 		if (quads.size() >= MAX) quads.clear();
 		quads.put(key, built);
 		return built;
+	}
+
+	private static void switchMode(boolean f) {
+		long n = 0;
+		int c = 0;
+		synchronized (ALL) {
+			if (f == builtFlat) return;
+			builtFlat = f;
+			for (QuadCache q : ALL) {
+				for (List<BakedQuad> l : q.quads.values()) n += l.size();
+				q.quads.clear();
+				c++;
+			}
+		}
+		FurenikusRoads.logger.info("[QuadCache] flat={}: {} caches emptied, {} quads dropped", f, c, n);
 	}
 
 	private static final class Key {
