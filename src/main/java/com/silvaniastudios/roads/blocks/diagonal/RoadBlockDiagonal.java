@@ -659,7 +659,7 @@ public class RoadBlockDiagonal extends BlockBase {
 		if (stateSide.getBlock().isAir(stateSide, world, posSide)) {
 			return 0;
 		}
-		return (float) stateSide.getBlock().getBoundingBox(stateSide, Minecraft.getMinecraft().world, posSide).maxY;
+		return (float) stateSide.getBlock().getBoundingBox(stateSide, world, posSide).maxY;
 	}
 
 	public HalfBlock getHalfBlock(IBlockState state, HalfBlock.HalfBlockSide side, BlockPos pos, EnumFacing facing, World world) {

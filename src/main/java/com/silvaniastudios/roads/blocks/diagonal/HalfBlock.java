@@ -76,9 +76,17 @@ public class HalfBlock {
 		}
 	}
 
+	/**
+	 * Welt fuer Modelle, die nicht aus der Client-Welt gebaut werden (MWRP-Fernsicht baut ferne Chunks auf eigenen
+	 * Threads aus eigenen Daten). Gesetzt vom Bauer je Thread; leer = Client-Welt wie bisher. Ohne das las HalfBlock an
+	 * fernen Stellen die Client-Welt (dort Luft): Hoehe 0, keine Textur, halbe Diagonalstrassen in der Ferne.
+	 */
+	public static final ThreadLocal<World> WORLD_OVERRIDE = new ThreadLocal<>();
+
 	public HalfBlock(IExtendedBlockState sharedState, HalfBlockSide side, BlockPos pos, EnumFacing facing) {
 		block = (RoadBlockDiagonal) sharedState.getBlock();
-		this.world = Minecraft.getMinecraft().world;
+		World override = WORLD_OVERRIDE.get();
+		this.world = override != null ? override : Minecraft.getMinecraft().world;
 		Minecraft mc = Minecraft.getMinecraft();
 		
 		sharedState = (IExtendedBlockState) block.getExtendedState(sharedState, world, pos);
